@@ -30,7 +30,7 @@ class GameController
   end
 
   def self.accept_move
-    c = self.char_if_pressed
+    c = self.read_input
 
     case c
     when " "
@@ -126,8 +126,8 @@ class SnakeGame
 
   def grow_snake
     # add new coordinate to snake body
-    # @snake[:body] << [@snake[:body], ]
-    puts "we should grow!"
+    @snake[:body] << [@snake[:body].last.first, @snake[:body].last.last]
+    # puts "we should grow!"
   end
 
   def reset_grid
@@ -146,7 +146,14 @@ class SnakeGame
   end
 
   def apple_is_eaten
-    @snake[:body].include? @apple
+    # calculate apple negative index and compare both
+    @possible_apples = [
+      @apple,
+      [@apple.first, -(80-@apple.last)],
+      [-(20-@apple.first), @apple.last],
+      [-(20-@apple.first), -(80-@apple.last)]
+    ]
+    @possible_apples.any? { |a| @snake[:body].include?(a) }
   end
 end
 
@@ -157,7 +164,7 @@ Thread.new do
   while game.is_playable do
     move = GameController.accept_move
     game.change_snake_direction(move)
-    sleep 1.0/2
+    sleep 1.0/5
   end
 end
 
@@ -175,10 +182,9 @@ while game.is_playable
     game.place_apple
     game.draw_snake
     game.move_snake
-    puts "xxx"
     game.draw_grid
     game.reset_grid
-    sleep 1.0/2
+    sleep 1.0/5
     system "clear" or system "cls"
   end
   game.grow_snake
